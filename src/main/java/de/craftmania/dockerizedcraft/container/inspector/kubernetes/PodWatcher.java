@@ -6,6 +6,9 @@ import de.craftmania.dockerizedcraft.container.inspector.events.ContainerEvent;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import java.util.logging.Logger;
+
+import com.sun.corba.se.spi.orbutil.fsm.Action;
+
 import java.net.InetAddress;
 import java.util.*;
 
@@ -27,9 +30,12 @@ public class PodWatcher implements Watcher<Pod> {
             logger.info("labels: "+labels.toString());
             if(!labels.containsKey("dockerizedcraft/enabled") || !labels.get("dockerizedcraft/enabled").equals("true")) return;
 
-            String dockerAction = "stop";
-            if(resource.getStatus().getPhase().equals("Running")){
+            String dockerAction = "nothing";
+            if(action.toString().equals("ADDED")){
                 dockerAction = "start";
+            }
+            else if(action.toString().equals("DELETED")){
+                dockerAction = "stop";
             }
 
             ContainerEvent containerEvent = new ContainerEvent(resource.getMetadata().getName(), dockerAction);
@@ -43,7 +49,8 @@ public class PodWatcher implements Watcher<Pod> {
             logger.info("port: "+environmentVariables.get("SERVER_PORT"));
             containerEvent.setIp(InetAddress.getByName(resource.getStatus().getPodIP()));
             logger.info("ip: "+resource.getStatus().getPodIP());
-            this.proxyServer.getPluginManager().callEvent(containerEvent);
+            if (!dockerAction.equals("nothing"))
+                this.proxyServer.getPluginManager().callEvent(containerEvent);
         }catch(java.net.UnknownHostException ex){
             logger.severe(ex.getMessage());
         }
