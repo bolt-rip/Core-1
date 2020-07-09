@@ -178,10 +178,10 @@ data:
     #   - default (string):              If the environment variable is not defined will fall
     #                                    back to the given default
     meta-data-mapper:
-      # make the SERVER_TYPE also accessible
+      # make the TYPE also accessible
       type:
         required: true
-        environment-variable: SERVER_TYPE
+        environment-variable: TYPE
 
       # Category for i.e create server selector menus based on categories
       category:
@@ -237,9 +237,9 @@ data:
     # Type: Section
     environment-variables:
       # The events listener will only add server with the defined environment variable
-      # ie. docker run -e SERVER_TYPE=minecraft_spigot my_server
+      # ie. docker run -e TYPE=minecraft_spigot my_server
       # Type: String
-      identifier: SERVER_TYPE
+      identifier: TYPE
 
       # Be default the first exposed port is taken if the container exposes multiple ports you can
       # set it by setting the PORT environment variable in the container
@@ -288,6 +288,8 @@ spec:
       - env:
         - name: UID
           value: "1000"
+        - name: PLUGINS
+          value: "https://github.com/bolt-rip/Dockerizedcraft/releases/download/0.2.3/DockerizedCraft.jar"
         image: itzg/bungeecord
         imagePullPolicy: Always
         name: bungeecord
@@ -297,17 +299,11 @@ spec:
           name: 25577tcp255650
           protocol: TCP
         volumeMounts:
-        - mountPath: /server/plugins/DockerizedCraft.jar
-          name: bungeecord-claim-dockerizedcraft
-          subPath: DockerizedCraft.jar
         - mountPath: /server/plugins/DockerizedCraft/
           name: dockerizedcraft-config
       serviceAccount: dockerizedcraft-account
       serviceAccountName: dockerizedcraft-account
       volumes:
-      - name: bungeecord-claim-dockerizedcraft
-        persistentVolumeClaim:
-        claimName: bungeecord-claim-dockerizedcraft
       - configMap:
           defaultMode: 256
           name: dockerizedcraft-config
@@ -340,10 +336,10 @@ spec:
           value: lobby
         - name: SERVER_PORT
           value: "25565"
-        - name: SERVER_TYPE
+        - name: TYPE
           value: spigot
         - name: VERSION
-          value: 1.12.2
+          value: 1.16.1
         image: itzg/minecraft-server
         imagePullPolicy: Always
         name: lobby
@@ -374,10 +370,10 @@ spec:
           value: server
         - name: SERVER_PORT
           value: "25565"
-        - name: SERVER_TYPE
+        - name: TYPE
           value: spigot
         - name: VERSION
-          value: 1.12.2
+          value: 1.16.1
         image: itzg/minecraft-server
         imagePullPolicy: Always
         name: server
