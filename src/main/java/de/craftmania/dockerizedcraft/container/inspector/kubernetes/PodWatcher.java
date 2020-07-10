@@ -31,7 +31,7 @@ public class PodWatcher implements Watcher<Pod> {
             if(!labels.containsKey("dockerizedcraft/enabled") || !labels.get("dockerizedcraft/enabled").equals("true")) return;
 
             String dockerAction = "nothing";
-            if(action.toString().equals("ADDED")){
+            if((action.toString().equals("ADDED") || action.toString().equals("MODIFIED")) && resource.getStatus().getPhase().equals("Running")){
                 dockerAction = "start";
             }
             else if(action.toString().equals("DELETED")){
