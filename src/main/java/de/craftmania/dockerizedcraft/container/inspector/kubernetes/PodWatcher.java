@@ -28,10 +28,12 @@ public class PodWatcher implements Watcher<Pod> {
             logger.info("phase: " +resource.getStatus().getPhase());
             Map<String, String> labels = resource.getMetadata().getLabels();
             logger.info("labels: "+labels.toString());
+            logger.info("ready: " + resource.getStatus().getContainerStatuses().get(0).getReady());
             if(!labels.containsKey("dockerizedcraft/enabled") || !labels.get("dockerizedcraft/enabled").equals("true")) return;
 
             String dockerAction = "nothing";
-            if((action.toString().equals("ADDED") || action.toString().equals("MODIFIED")) && resource.getStatus().getPhase().equals("Running")){
+            if((action.toString().equals("ADDED") || action.toString().equals("MODIFIED")) && resource.getStatus().getPhase().equals("Running") 
+                && resource.getStatus().getContainerStatuses().get(0).getReady()){
                 dockerAction = "start";
             }
             else if(action.toString().equals("DELETED")){
