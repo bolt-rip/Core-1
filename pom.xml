@@ -28,11 +28,15 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputFile>target/assembly/${project.artifactId}.jar</outputFile>
-                            <relocations>
+							<outputFile>target/assembly/${project.artifactId}.jar</outputFile>
+                            <relocations combine.children="append">
                                 <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>de.craftmania.dockerizedcraft</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml</pattern>
+                                    <shadedPattern>de.craftmania.dockerizedcraft.lib.com.fasterxml</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
