@@ -28,7 +28,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-							<outputFile>target/assembly/${project.artifactId}.jar</outputFile>
                             <relocations combine.children="append">
                                 <relocation>
                                     <pattern>org.bstats</pattern>
