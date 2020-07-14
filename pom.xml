@@ -8,6 +8,13 @@
     <artifactId>DockerizedCraft</artifactId>
     <version>0.2.2</version>
 
+    <distributionManagement>
+        <repository>
+            <id>bolt-rip-public</id>
+            <url>https://repo.repsy.io/mvn/boltrip/public</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
