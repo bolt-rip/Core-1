@@ -38,5 +38,8 @@ docker:
   network: "minecraft_local"
 
 kubernetes:
+  # Should the plugin get the kubernetes config from the cluster? If false, it will load the config from kubeconfig.yml
+  load-from-cluster: true
+
   # The namespace that bungeecord and all minecraft servers reside in
   namespace: minecraft
