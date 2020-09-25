@@ -22,6 +22,7 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
 
     private Configuration mappingConfig;
     private Logger logger;
+    private Boolean debug;
 
     private JsonObject serverInfos;
     private Map<String, ServerInfo> servers;
@@ -31,6 +32,7 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
         this.mappingConfig = mappingConfig;
         this.serverInfos = new JsonObject();
         this.servers = new HashMap<>();
+        this.debug = mappingConfig.getBoolean("debug");
     }
 
     public void sendUpdate() {
@@ -38,7 +40,9 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
     }
 
     private void sendServerList(Map<String, ServerInfo> servers) {
-        this.logger.info("[Plugin Notification] Sending update to servers");
+        if (this.debug) {
+            this.logger.info("[Plugin Notification] Sending update to servers");
+        }
         for (String serverName: servers.keySet()) {
             this.sendMessage(
                     this.servers.get(serverName),
@@ -87,7 +91,9 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
         this.serverInfos.add(event.getServerInfo().getName(), this.getMetaData(event.getServerInfo(), event.getEnvironmentVariables()));
         this.servers.put(event.getServerInfo().getName(), event.getServerInfo());
 
-        this.logger.info("[Plugin Notification] Added Server meta data: " + event.getServerInfo().getName());
+        if (this.debug) {
+            this.logger.info("[Plugin Notification] Added Server meta data: " + event.getServerInfo().getName());
+        }
         this.sendServerList(this.servers);
 
     }
@@ -97,8 +103,9 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
     public void onPreRemoveServer(PreRemoveServerEvent event) {
         this.serverInfos.remove(event.getServerInfo().getName());
         this.servers.remove(event.getServerInfo().getName());
-
-        this.logger.info("[Plugin Notification] Removed Server meta data: " + event.getServerInfo().getName());
+        if (this.debug) {
+            this.logger.info("[Plugin Notification] Removed Server meta data: " + event.getServerInfo().getName());
+        }
         this.sendServerList(this.servers);
     }
 }

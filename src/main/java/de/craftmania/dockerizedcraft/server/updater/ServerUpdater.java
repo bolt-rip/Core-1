@@ -113,10 +113,12 @@ public class ServerUpdater implements Listener {
         ));
 
         this.proxyServer.getServers().put(serverInfo.getName(), serverInfo);
-        this.logger.info("[Server Updater] Added server: " + serverInfo.getName());
-        this.logger.info("[Server Updater]  > Address: " + serverInfo.getAddress().toString());
-        this.logger.info("[Server Updater]  > MOTD: " + serverInfo.getMotd());
-        this.logger.info("[Server Updater]  > Trigger-Event-Action: " + eventData.getAction());
+        if (this.debug) {
+            this.logger.info("[Server Updater] Added server: " + serverInfo.getName());
+            this.logger.info("[Server Updater]  > Address: " + serverInfo.getAddress().toString());
+            this.logger.info("[Server Updater]  > MOTD: " + serverInfo.getMotd());
+            this.logger.info("[Server Updater]  > Trigger-Event-Action: " + eventData.getAction());
+        }
 
         this.proxyServer.getPluginManager().callEvent(new PostAddServerEvent(
                 serverInfo,
