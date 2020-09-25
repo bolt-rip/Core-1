@@ -28,8 +28,6 @@ public class PodWatcher implements Watcher<Pod> {
             logger.info("phase: " +resource.getStatus().getPhase());
             Map<String, String> labels = resource.getMetadata().getLabels();
             logger.info("labels: "+labels.toString());
-            if (resource.getStatus().getPhase().equals("Running"))
-                logger.info("ready: " + resource.getStatus().getContainerStatuses().get(0).getReady());
             if(!labels.containsKey("dockerizedcraft/enabled") || !labels.get("dockerizedcraft/enabled").equals("true")) return;
 
             String dockerAction = "nothing";
