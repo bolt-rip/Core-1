@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+
 @SuppressWarnings("unused")
 public class DockerizedCraft extends Plugin {
     private Map<String, Configuration> configuration;
@@ -31,7 +32,7 @@ public class DockerizedCraft extends Plugin {
     @Override
     public void onEnable() {
         // bStats
-        // Metrics metrics = new Metrics(this);
+        //Metrics metrics = new Metrics(this);
 
         try {
             this.loadConfiguration();
@@ -48,6 +49,7 @@ public class DockerizedCraft extends Plugin {
             bootstrapConnectionBalancer(getConfiguration().get("connection-balancer"));
         }
 
+
         if (getConfiguration().get("server-updater").getBoolean("enabled")) {
             getLogger().info("[Server Updater] Enabled!");
             bootstrapServerUpdater(getConfiguration().get("server-updater"));
@@ -60,32 +62,37 @@ public class DockerizedCraft extends Plugin {
 
         if (getConfiguration().get("container-inspector").getBoolean("enabled")) {
             getLogger().info("[Container Inspector] Enabled!");
-            bootstrapContainerInspector(getConfiguration().get("container-inspector"));
+            bootstrapContainerInspector(
+                    getConfiguration().get("container-inspector")
+            );
         }
     }
 
     /**
-     * Bootstraps the Connection Balancer, sets the reconnect handler and adds the
-     * registered listener
-     * 
+     * Bootstraps the Connection Balancer, sets the reconnect handler and adds the registered listener
      * @param configuration The connection balancer configuration
      */
     private void bootstrapConnectionBalancer(Configuration configuration) {
-        ConnectionBalancer connectionBalancer = new ConnectionBalancer(configuration, getLogger(), this);
+        ConnectionBalancer connectionBalancer = new ConnectionBalancer(
+                configuration,
+                getLogger(),
+                this
+        );
 
-        SessionStorage sessionStorage = new RedisSessionStorage(configuration.getString("session-store.redis.host"),
+        SessionStorage sessionStorage = new RedisSessionStorage(
+                configuration.getString("session-store.redis.host"),
                 configuration.getString("session-store.redis.password"),
-                configuration.getInt("session-store.redis.port"), configuration.getBoolean("session-store.redis.ssl"));
+                configuration.getInt("session-store.redis.port"),
+                configuration.getBoolean("session-store.redis.ssl")
+        );
 
-        ReconnectHandler reconnectHandler = new BalancedReconnectHandler(connectionBalancer, sessionStorage,
-                this.getLogger());
+        ReconnectHandler reconnectHandler = new BalancedReconnectHandler(connectionBalancer, sessionStorage, this.getLogger());
         getProxy().setReconnectHandler(reconnectHandler);
         getProxy().getPluginManager().registerListener(this, connectionBalancer);
     }
 
     /**
      * Bootstraps the server update and adds it the the registered listeners
-     * 
      * @param configuration The server updater configuration
      */
     private void bootstrapServerUpdater(Configuration configuration) {
@@ -95,22 +102,26 @@ public class DockerizedCraft extends Plugin {
 
     /**
      * Bootstraps the plugin notifier and adds scheduled interval tasks
-     * 
      * @param configuration The plugin notifier configuration
      */
     private void bootstrapPluginNotifier(Configuration configuration) {
-        ServerListPluginNotifier notifier = new ServerListPluginNotifier(configuration.getSection("meta-data-mapper"),
-                getLogger());
+        ServerListPluginNotifier notifier = new ServerListPluginNotifier(
+                configuration.getSection("meta-data-mapper"),
+                getLogger()
+        );
 
         getProxy().getPluginManager().registerListener(this, notifier);
-        getProxy().getScheduler().schedule(this, notifier::sendUpdate, 0, configuration.getInt("refresh-interval"),
-                TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(
+                this,
+                notifier::sendUpdate,
+                0,
+                configuration.getInt("refresh-interval"),
+                TimeUnit.SECONDS
+        );
     }
 
     /**
-     * Bootstraps the container inspector and runs the inspector and listener as
-     * async task through the scheduler
-     * 
+     * Bootstraps the container inspector and runs the inspector and listener as async task through the scheduler
      * @param configuration The container inspector configuration
      */
     private void bootstrapContainerInspector(Configuration configuration) {
@@ -119,8 +130,7 @@ public class DockerizedCraft extends Plugin {
         if (configuration.getString("backend").equals("docker")) {
             containerInspector = new DockerContainerInspector(configuration, getProxy(), getLogger());
         } else {
-            containerInspector = new KubernetesContainerInspector(configuration, getProxy(), getLogger(),
-                    getDataFolder());
+            containerInspector = new KubernetesContainerInspector(configuration, getProxy(), getLogger());
         }
 
         getProxy().getScheduler().runAsync(this, containerInspector::runContainerInspection);
@@ -129,14 +139,18 @@ public class DockerizedCraft extends Plugin {
 
     /**
      * Loads the configurations
-     * 
      * @throws IOException On missing write access
      */
     private void loadConfiguration() throws IOException {
 
-        List<String> configNames = Arrays.asList("connection-balancer", "plugin-notifier", "container-inspector",
-                "server-updater");
+        List<String> configNames = Arrays.asList(
+                "connection-balancer",
+                "plugin-notifier",
+                "container-inspector",
+                "server-updater"
+        );
         Map<String, Configuration> configuration = new HashMap<>(configNames.size());
+
 
         if (!getDataFolder().exists()) {
             if (!getDataFolder().mkdir()) {
@@ -144,7 +158,9 @@ public class DockerizedCraft extends Plugin {
             }
         }
 
+
         for (String configName : configNames) {
+
 
             File file = new File(getDataFolder(), configName + ".yml");
 
@@ -156,7 +172,8 @@ public class DockerizedCraft extends Plugin {
                 }
             }
             configuration.put(configName, ConfigurationProvider.getProvider(YamlConfiguration.class)
-                    .load(new File(getDataFolder(), configName + ".yml")));
+                    .load(new File(getDataFolder(), configName + ".yml")
+                    ));
         }
 
         this.configuration = configuration;
