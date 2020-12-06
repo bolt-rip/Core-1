@@ -5,8 +5,10 @@ import net.md_5.bungee.api.ProxyServer;
 import io.fabric8.kubernetes.api.model.Pod;
 import de.craftmania.dockerizedcraft.container.inspector.events.ContainerEvent;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.NodeAddress;
 
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sun.corba.se.spi.orbutil.fsm.Action;
 
@@ -23,14 +25,17 @@ public class PodWatcher implements Watcher<Pod> {
     private Boolean debug;
     private KubernetesClient client;
     private String namespace;
+    private Boolean hostport;
 
-    PodWatcher(ProxyServer proxyServer, Logger logger, Configuration configuration, KubernetesClient client, String namespace) {
+    PodWatcher(ProxyServer proxyServer, Logger logger, Configuration configuration, KubernetesClient client,
+            String namespace, Boolean hostport) {
         this.proxyServer = proxyServer;
         this.logger = logger;
         this.configuration = configuration;
         this.debug = configuration.getBoolean("debug");
         this.client = client;
         this.namespace = namespace;
+        this.hostport = hostport;
     }
 
     @Override
@@ -50,13 +55,15 @@ public class PodWatcher implements Watcher<Pod> {
                 if (this.debug) {
                     logger.info("[Kubernetes Container Inspector] labels: " + labels.toString());
                 }
-                if (!labels.containsKey("dockerizedcraft/enabled") || !labels.get("dockerizedcraft/enabled").equals("true"))
+                if (!labels.containsKey("dockerizedcraft/enabled")
+                        || !labels.get("dockerizedcraft/enabled").equals("true"))
                     return;
             } else {
                 return;
             }
             String dockerAction = "nothing";
-            if ((action.toString().equals("ADDED") || action.toString().equals("MODIFIED")) && resource.getStatus().getPhase().equals("Running")) {
+            if ((action.toString().equals("ADDED") || action.toString().equals("MODIFIED"))
+                    && resource.getStatus().getPhase().equals("Running")) {
                 if (resource.getStatus().getContainerStatuses().get(0).getReady())
                     dockerAction = "start";
             } else if (action.toString().equals("DELETED")) {
@@ -69,13 +76,35 @@ public class PodWatcher implements Watcher<Pod> {
             for (EnvVar i : resource.getSpec().getContainers().get(0).getEnv())
                 environmentVariables.put(i.getName(), i.getValue());
             containerEvent.setEnvironmentVariables(environmentVariables);
-            if (this.debug) {
-                logger.info("[Kubernetes Container Inspector] env:" + environmentVariables);
-                logger.info("[Kubernetes Container Inspector] port: " + environmentVariables.get("SERVER_PORT"));
-                logger.info("[Kubernetes Container Inspector] ip: " + resource.getStatus().getPodIP());
+            if (hostport) {
+                String nodeName = resource.getSpec().getNodeName();
+                List<NodeAddress> nodeAddresses = client.nodes().withName(nodeName).get().getStatus().getAddresses();
+                List<NodeAddress> nodeExternalAddresses = nodeAddresses.stream()
+                        .filter(address -> address.getType().equals("ExternalIP")).collect(Collectors.toList());
+                List<NodeAddress> nodeInternalAddresses = nodeAddresses.stream()
+                        .filter(address -> address.getType().equals("InternalIP")).collect(Collectors.toList());
+                String ip = "0.0.0.0";
+                if (nodeExternalAddresses.size() > 0)
+                    ip = nodeExternalAddresses.get(0).getAddress();
+                else
+                    ip = nodeInternalAddresses.get(0).getAddress();
+                String port = resource.getMetadata().getAnnotations().get("dynamic-hostports.k8s/25565");
+                if (this.debug) {
+                    logger.info("[Kubernetes Container Inspector] env:" + environmentVariables);
+                    logger.info("[Kubernetes Container Inspector] port: " + port);
+                    logger.info("[Kubernetes Container Inspector] ip: " + ip);
+                }
+                containerEvent.setPort(Integer.parseInt(port));
+                containerEvent.setIp(InetAddress.getByName(ip));
+            } else {
+                if (this.debug) {
+                    logger.info("[Kubernetes Container Inspector] env:" + environmentVariables);
+                    logger.info("[Kubernetes Container Inspector] port: " + environmentVariables.get("SERVER_PORT"));
+                    logger.info("[Kubernetes Container Inspector] ip: " + resource.getStatus().getPodIP());
+                }
+                containerEvent.setPort(Integer.parseInt(environmentVariables.get("SERVER_PORT")));
+                containerEvent.setIp(InetAddress.getByName(resource.getStatus().getPodIP()));
             }
-            containerEvent.setPort(Integer.parseInt(environmentVariables.get("SERVER_PORT")));
-            containerEvent.setIp(InetAddress.getByName(resource.getStatus().getPodIP()));
             if (!dockerAction.equals("nothing"))
                 this.proxyServer.getPluginManager().callEvent(containerEvent);
         } catch (java.net.UnknownHostException ex) {
@@ -88,6 +117,7 @@ public class PodWatcher implements Watcher<Pod> {
     public void onClose(KubernetesClientException cause) {
         logger.warning("[Kubernetes Container Inspector] Watcher close due to " + cause);
         logger.warning("[Kubernetes Container Inspector] Rewatching resources...");
-        client.pods().inNamespace(namespace).watch(new PodWatcher(proxyServer, logger, configuration, client, namespace));
+        client.pods().inNamespace(namespace)
+                .watch(new PodWatcher(proxyServer, logger, configuration, client, namespace, hostport));
     }
 }

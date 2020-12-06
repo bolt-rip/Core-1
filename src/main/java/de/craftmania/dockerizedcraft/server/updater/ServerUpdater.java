@@ -76,7 +76,7 @@ public class ServerUpdater implements Listener {
 
         if (serverInfo.getAddress().getHostName() == null) {
             this.logger.warning("[Server Updater] Could not add server:" + serverInfo.getName());
-            this.logger.warning("[Server Updater]  > Reason: No IP, is you network fine?");
+            this.logger.warning("[Server Updater]  > Reason: No IP, is your network fine?");
             this.logger.warning("[Server Updater]  > Trigger-Event-Action: " + eventData.getAction());
 
             return;
