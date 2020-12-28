@@ -94,8 +94,16 @@ public class PodWatcher implements Watcher<Pod> {
                     logger.info("[Kubernetes Container Inspector] port: " + port);
                     logger.info("[Kubernetes Container Inspector] ip: " + ip);
                 }
-                containerEvent.setPort(Integer.parseInt(port));
-                containerEvent.setIp(InetAddress.getByName(ip));
+                try { 
+                    containerEvent.setPort(Integer.parseInt(port));
+                    containerEvent.setIp(InetAddress.getByName(ip));
+                }
+                catch(Exception ex) {
+                    if (this.debug) {
+                        logger.info("Error while parsing port or IP.");
+                    }
+                    return;
+                }
             } else {
                 if (this.debug) {
                     logger.info("[Kubernetes Container Inspector] env:" + environmentVariables);

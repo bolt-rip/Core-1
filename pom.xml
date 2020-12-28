@@ -6,7 +6,7 @@
 
     <groupId>de.craftmania</groupId>
     <artifactId>DockerizedCraft</artifactId>
-    <version>0.2.5</version>
+    <version>0.2.6</version>
 
     <distributionManagement>
         <repository>
