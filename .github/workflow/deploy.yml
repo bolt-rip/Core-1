@@ -1,0 +1,20 @@
+name: Publish package to the Maven Repository
+on:
+  push:
+    branches: [ master ]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v9
+        with:
+          repositories: '[{ "id": "bolt-rip-public", "url": "https://repo.repsy.io/mvn/boltrip/public", "releases": { "enabled": "true" }, "snapshots": { "enabled": "true" } }]'
+          servers: '[{ "id": "bolt-rip-public", "username": "${{ secrets.MAVEN_USERNAME }}", "password": "${{ secrets.MAVEN_PASSWORD }}" }]'
+      - name: Publish package
+        run: mvn -B deploy
