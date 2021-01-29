@@ -78,6 +78,8 @@ public class PodWatcher implements Watcher<Pod> {
             containerEvent.setEnvironmentVariables(environmentVariables);
             if (hostport) {
                 String nodeName = resource.getSpec().getNodeName();
+                if (nodeName == null)
+                    return;
                 List<NodeAddress> nodeAddresses = client.nodes().withName(nodeName).get().getStatus().getAddresses();
                 List<NodeAddress> nodeExternalAddresses = nodeAddresses.stream()
                         .filter(address -> address.getType().equals("ExternalIP")).collect(Collectors.toList());
