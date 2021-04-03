@@ -40,4 +40,3 @@ docker:
 kubernetes:
   # The namespace that bungeecord and all minecraft servers reside in
   namespace: minecraft
-  hostport: true

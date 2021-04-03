@@ -25,17 +25,15 @@ public class PodWatcher implements Watcher<Pod> {
     private Boolean debug;
     private KubernetesClient client;
     private String namespace;
-    private Boolean hostport;
 
     PodWatcher(ProxyServer proxyServer, Logger logger, Configuration configuration, KubernetesClient client,
-            String namespace, Boolean hostport) {
+            String namespace) {
         this.proxyServer = proxyServer;
         this.logger = logger;
         this.configuration = configuration;
         this.debug = configuration.getBoolean("debug");
         this.client = client;
         this.namespace = namespace;
-        this.hostport = hostport;
     }
 
     @Override
@@ -51,6 +49,7 @@ public class PodWatcher implements Watcher<Pod> {
             }
 
             Map<String, String> labels = resource.getMetadata().getLabels();
+            Map<String, String> annotations = resource.getMetadata().getAnnotations();
             if (labels != null) {
                 if (this.debug) {
                     logger.info("[Kubernetes Container Inspector] labels: " + labels.toString());
@@ -75,8 +74,8 @@ public class PodWatcher implements Watcher<Pod> {
             Map<String, String> environmentVariables = new HashMap<>();
             for (EnvVar i : resource.getSpec().getContainers().get(0).getEnv())
                 environmentVariables.put(i.getName(), i.getValue());
-            containerEvent.setEnvironmentVariables(environmentVariables);
-            if (hostport) {
+            if (annotations.toString().contains("dynamic-hostports.k8s")) {
+                environmentVariables.remove("SERVER_PORT");
                 String nodeName = resource.getSpec().getNodeName();
                 if (nodeName == null)
                     return;
@@ -90,7 +89,7 @@ public class PodWatcher implements Watcher<Pod> {
                     ip = nodeExternalAddresses.get(0).getAddress();
                 else
                     ip = nodeInternalAddresses.get(0).getAddress();
-                String port = resource.getMetadata().getAnnotations().get("dynamic-hostports.k8s/25565");
+                String port = annotations.get("dynamic-hostports.k8s/25565");
                 if (this.debug) {
                     logger.info("[Kubernetes Container Inspector] env:" + environmentVariables);
                     logger.info("[Kubernetes Container Inspector] port: " + port);
@@ -115,6 +114,7 @@ public class PodWatcher implements Watcher<Pod> {
                 containerEvent.setPort(Integer.parseInt(environmentVariables.get("SERVER_PORT")));
                 containerEvent.setIp(InetAddress.getByName(resource.getStatus().getPodIP()));
             }
+            containerEvent.setEnvironmentVariables(environmentVariables);
             if (!dockerAction.equals("nothing"))
                 this.proxyServer.getPluginManager().callEvent(containerEvent);
         } catch (java.net.UnknownHostException ex) {
@@ -128,6 +128,6 @@ public class PodWatcher implements Watcher<Pod> {
         logger.warning("[Kubernetes Container Inspector] Watcher close due to " + cause);
         logger.warning("[Kubernetes Container Inspector] Rewatching resources...");
         client.pods().inNamespace(namespace)
-                .watch(new PodWatcher(proxyServer, logger, configuration, client, namespace, hostport));
+                .watch(new PodWatcher(proxyServer, logger, configuration, client, namespace));
     }
 }

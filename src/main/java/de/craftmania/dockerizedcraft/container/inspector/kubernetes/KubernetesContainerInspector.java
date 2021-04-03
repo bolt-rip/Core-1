@@ -28,8 +28,7 @@ public class KubernetesContainerInspector implements IContainerInspector {
     public void runContainerListener() {
         this.logger.info("[Kubernetes Container Inspector] Running listener.");
         String namespace = configuration.getString("kubernetes.namespace");
-        Boolean hostport = configuration.getBoolean("kubernetes.hostport");
         if (namespace == null || namespace.isEmpty()) this.logger.severe("kubernetes.namespace not set.");
-        this.client.pods().inNamespace(namespace).watch(new PodWatcher(proxyServer, logger, configuration, client, namespace, hostport));
+        this.client.pods().inNamespace(namespace).watch(new PodWatcher(proxyServer, logger, configuration, client, namespace));
     }
 }
