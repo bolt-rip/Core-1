@@ -25,4 +25,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with: 
         name: DockerizedCraft.jar
-        path: target/DockerizedCraft-*.jar
+        path: target/DockerizedCraft-*-shaded.jar
