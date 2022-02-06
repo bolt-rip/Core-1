@@ -51,7 +51,6 @@ public class ServerUpdater implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onDockerEvent(ContainerEvent event) {
         if (!event.getEnvironmentVariables().containsKey(this.identifierKey)) {
             logger.info("missing identifier" + this.identifierKey);
@@ -69,8 +68,8 @@ public class ServerUpdater implements Listener {
         logger.info("unknown action on event: "+event.getAction());
     }
 
-
-    private void addServer(ContainerEvent eventData) {
+    @SuppressWarnings("deprecation")
+	private void addServer(ContainerEvent eventData) {
 
         ServerInfo serverInfo = this.getServerInfoForEvent(eventData);
 

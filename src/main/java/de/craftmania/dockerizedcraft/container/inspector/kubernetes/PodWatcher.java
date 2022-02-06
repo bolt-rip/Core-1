@@ -1,21 +1,21 @@
 package de.craftmania.dockerizedcraft.container.inspector.kubernetes;
 
-import io.fabric8.kubernetes.client.*;
-import net.md_5.bungee.api.ProxyServer;
-import io.fabric8.kubernetes.api.model.Pod;
-import de.craftmania.dockerizedcraft.container.inspector.events.ContainerEvent;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.NodeAddress;
-
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.sun.corba.se.spi.orbutil.fsm.Action;
-
+import de.craftmania.dockerizedcraft.container.inspector.events.ContainerEvent;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.NodeAddress;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watcher;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.config.Configuration;
-
-import java.net.InetAddress;
-import java.util.*;
 
 public class PodWatcher implements Watcher<Pod> {
 

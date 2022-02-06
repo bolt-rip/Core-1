@@ -54,7 +54,8 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
 
     }
 
-    private JsonObject getMetaData(ServerInfo server, Map<String, String> environmentVariables) {
+    @SuppressWarnings("deprecation")
+	private JsonObject getMetaData(ServerInfo server, Map<String, String> environmentVariables) {
         JsonObject serverMetaData = new JsonObject();
         serverMetaData.addProperty("address", server.getAddress().getAddress().getHostAddress() + ':' + server.getAddress().getPort());
         serverMetaData.addProperty("host", server.getAddress().getAddress().getHostAddress());
@@ -86,7 +87,6 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onPostAddServer(PostAddServerEvent event) {
         this.serverInfos.add(event.getServerInfo().getName(), this.getMetaData(event.getServerInfo(), event.getEnvironmentVariables()));
         this.servers.put(event.getServerInfo().getName(), event.getServerInfo());
@@ -99,7 +99,6 @@ public class ServerListPluginNotifier extends AbstractNotifier implements Listen
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onPreRemoveServer(PreRemoveServerEvent event) {
         this.serverInfos.remove(event.getServerInfo().getName());
         this.servers.remove(event.getServerInfo().getName());

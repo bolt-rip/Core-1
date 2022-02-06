@@ -1,10 +1,9 @@
 package de.craftmania.dockerizedcraft.connection.balancer.session;
 
+import java.util.UUID;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.exceptions.JedisConnectionException;
-
-import java.util.UUID;
 
 public class RedisSessionStorage implements SessionStorage {
 

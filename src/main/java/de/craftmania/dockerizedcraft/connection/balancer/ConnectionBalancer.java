@@ -1,25 +1,24 @@
 package de.craftmania.dockerizedcraft.connection.balancer;
 
-import de.craftmania.dockerizedcraft.connection.balancer.command.GroupCommand;
-import de.craftmania.dockerizedcraft.connection.balancer.strategy.BalanceStrategy;
-import de.craftmania.dockerizedcraft.connection.balancer.strategy.Strategy;
-import de.craftmania.dockerizedcraft.server.updater.events.PostAddServerEvent;
-import de.craftmania.dockerizedcraft.server.updater.events.PreRemoveServerEvent;
-import de.craftmania.dockerizedcraft.connection.balancer.model.Group;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.event.PluginMessageEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.plugin.PluginManager;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.event.EventHandler;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import de.craftmania.dockerizedcraft.connection.balancer.command.GroupCommand;
+import de.craftmania.dockerizedcraft.connection.balancer.model.Group;
+import de.craftmania.dockerizedcraft.connection.balancer.strategy.BalanceStrategy;
+import de.craftmania.dockerizedcraft.connection.balancer.strategy.Strategy;
+import de.craftmania.dockerizedcraft.server.updater.events.PostAddServerEvent;
+import de.craftmania.dockerizedcraft.server.updater.events.PreRemoveServerEvent;
+import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.event.EventHandler;
 
 public class ConnectionBalancer implements Listener {
 
@@ -110,7 +109,6 @@ public class ConnectionBalancer implements Listener {
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
     public ServerInfo getReconnectServer(String name) {
         if (this.servers.containsKey(name)) {
             if (this.groups.get(this.serverGroups.get(name)).getCanReconnect()) {
@@ -123,7 +121,6 @@ public class ConnectionBalancer implements Listener {
         return null;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public ServerInfo getForcedServer(String hostname) {
         if (this.forcedHostGroups.containsKey(hostname)) {
             return this.forcedHostGroups.get(hostname).getStrategy().getServer(this.forcedHostGroups.get(hostname).getServers());
@@ -136,7 +133,6 @@ public class ConnectionBalancer implements Listener {
         return null;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public ServerInfo getFallbackServer() {
         this.logger.info("Found " + this.defaultGroup.getServers().size() + " default servers");
         return this.defaultGroup.getStrategy().getServer(this.defaultGroup.getServers());
@@ -199,43 +195,35 @@ public class ConnectionBalancer implements Listener {
         return groups;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public void addServer(ServerInfo server) {
         this.servers.put(server.getName(), server);
     }
 
-    @SuppressWarnings("WeakerAccess")
     public void removeServer(ServerInfo server) {
         this.servers.remove(server.getName());
     }
 
-    @SuppressWarnings("unused")
     public void removeServer(String serverName) {
         this.servers.remove(serverName);
     }
 
-    @SuppressWarnings("unused")
     public ServerInfo getServer(ServerInfo server) {
         return this.servers.get(server.getName());
     }
 
-    @SuppressWarnings({"WeakerAccess", "unused"})
     public ServerInfo getServer(String name) {
         return this.servers.get(name);
     }
 
-    @SuppressWarnings({"WeakerAccess", "unused"})
     public String getServerGroup(String name) {
         return this.serverGroups.get(name);
     }
 
-    @SuppressWarnings({"WeakerAccess", "unused"})
     public String getServerGroup(ServerInfo server) {
         return this.serverGroups.get(server.getName());
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onPostAddServer(PostAddServerEvent event) {
         String groupName = ConnectionBalancer.defaultGroupName;
         if (event.getEnvironmentVariables().containsKey(this.groupEnvironmentVariable)) {
@@ -275,7 +263,6 @@ public class ConnectionBalancer implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onPreRemoveServer(PreRemoveServerEvent event) {
         if (!this.servers.containsKey(event.getServerInfo().getName())) {
             return;
@@ -302,7 +289,6 @@ public class ConnectionBalancer implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onPluginMessage(PluginMessageEvent event) {
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(event.getData()));
         try {
