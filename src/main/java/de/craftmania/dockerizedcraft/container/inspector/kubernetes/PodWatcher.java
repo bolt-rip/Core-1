@@ -74,7 +74,7 @@ public class PodWatcher implements Watcher<Pod> {
             Map<String, String> environmentVariables = new HashMap<>();
             for (EnvVar i : resource.getSpec().getContainers().get(0).getEnv())
                 environmentVariables.put(i.getName(), i.getValue());
-            if (annotations.toString().contains("dynamic-hostports.k8s")) {
+            if (annotations != null && annotations.toString().contains("dynamic-hostports.k8s")) {
                 environmentVariables.remove("SERVER_PORT");
                 String nodeName = resource.getSpec().getNodeName();
                 if (nodeName == null)
