@@ -1,7 +1,5 @@
 package de.craftmania.dockerizedcraft.connection.balancer;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +12,6 @@ import de.craftmania.dockerizedcraft.connection.balancer.strategy.Strategy;
 import de.craftmania.dockerizedcraft.server.updater.events.PostAddServerEvent;
 import de.craftmania.dockerizedcraft.server.updater.events.PreRemoveServerEvent;
 import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -285,16 +282,6 @@ public class ConnectionBalancer implements Listener {
                 this.forcedHostServers.remove(entry);
                 break;
             }
-        }
-    }
-
-    @EventHandler
-    public void onPluginMessage(PluginMessageEvent event) {
-        DataInputStream in = new DataInputStream(new ByteArrayInputStream(event.getData()));
-        try {
-            String subchanncel = in.readUTF();
-            this.logger.info(subchanncel);
-        } catch (Exception ignored) {
         }
     }
 }
